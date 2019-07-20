@@ -16,15 +16,18 @@ func main() {
 	}
 	fmt.Println("start walking")
 	fc := make(chan os.FileInfo)
-	
+	// sum := *new(int64)
+	sum := int64(0)
 	go func(){
 		walk(".", fc)
 		close(fc)
 	}()
 
 	for file := range fc {
-		fmt.Printf("Got file %s\n", file.Name())
+		fmt.Printf("Got file %s, size: %d\n", file.Name(), file.Size())
+		sum = sum + file.Size()
 	}
+	fmt.Printf("total file size: %d", sum)
 
 }
 
