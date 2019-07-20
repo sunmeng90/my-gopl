@@ -17,7 +17,8 @@ func main() {
 	fmt.Printf("start walking: %v\n", roots)
 	fc := make(chan os.FileInfo)
 	// sum := *new(int64)
-	sum := int64(0)
+	totalSize := int64(0)
+	totalFile := 0
 	go func(){
 		for _, d := range roots{
 			walk(d, fc)
@@ -27,9 +28,10 @@ func main() {
 
 	for file := range fc {
 		// fmt.Printf("Got file %s, size: %d\n", file.Name(), file.Size())
-		sum = sum + file.Size()
+		totalSize += file.Size()
+		totalFile++
 	}
-	fmt.Printf("total file size: %d", sum)
+	fmt.Printf("%d files %.2f GB\n", totalFile, float64(totalSize)/1e9)
 }
 
 func walk(dir string, fc chan<- os.FileInfo) {
