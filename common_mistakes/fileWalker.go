@@ -16,8 +16,11 @@ func main() {
 	}
 	fmt.Println("start walking")
 	fc := make(chan os.FileInfo)
-
-	go walk(".", fc)
+	
+	go func(){
+		walk(".", fc)
+		close(fc)
+	}()
 
 	for file := range fc {
 		fmt.Printf("Got file %s\n", file.Name())
