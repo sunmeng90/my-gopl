@@ -13,6 +13,17 @@ import (
 
 var verbose = flag.Bool("v", false, "show verbose progress message")
 
+var done = make(chan struct{})
+
+func cancelled() bool {
+	select {
+	case <-done:
+		return true
+	default:
+		return false
+	}
+}
+
 func main() {
 	flag.Parse()
 	roots := flag.Args()
@@ -27,6 +38,10 @@ func main() {
 	if *verbose {
 		tick = time.Tick(500 * time.Millisecond)
 	}
+	go func() {
+		os.Stdin.Read(make([]byte, 1)) //wait for cancel signal from console
+		close(done)
+	}()
 	var wg sync.WaitGroup
 
 	for _, d := range roots {
@@ -48,6 +63,13 @@ loop:
 			totalSize += file.Size()
 		case <-tick:
 			pringDiskUsage(nfiles, totalSize)
+		case <-done:
+			println("abort...")
+			// before leaving, drain all the file from channel that other goroutines had already put into
+			for range fc {
+				//do nothing
+			}
+			return
 		}
 	}
 	pringDiskUsage(nfiles, totalSize)
@@ -59,7 +81,14 @@ func pringDiskUsage(nfiles int, totalSize int64) {
 
 func walk(dir string, n *sync.WaitGroup, fc chan<- os.FileInfo) {
 	defer n.Done()
+	if cancelled() {
+		//pre-check for cancel flag and return if user request to cancel
+		return
+	}
 	for _, fd := range dirents(dir) {
+		if cancelled() {
+			return
+		}
 		if fd.IsDir() {
 			n.Add(1)
 			go walk(filepath.Join(dir, fd.Name()), n, fc)
@@ -69,11 +98,16 @@ func walk(dir string, n *sync.WaitGroup, fc chan<- os.FileInfo) {
 	}
 }
 
-var sema = make(chan struct{}, 20) //semaphore of size 20
+var sema = make(chan struct{}, 2) //semaphore of size 20
 
 func dirents(dir string) []os.FileInfo {
-	sema <- struct{}{}        //acquire a token
-	defer func() { <-sema }() //release token
+	select {
+	case sema <- struct{}{}: //acquire a token
+		defer func() { <-sema }()
+	case <-done:
+		return nil
+	}
+	// defer func() { <-sema }() //release token
 	entries, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return nil
