@@ -103,11 +103,10 @@ var sema = make(chan struct{}, 2) //semaphore of size 20
 func dirents(dir string) []os.FileInfo {
 	select {
 	case sema <- struct{}{}: //acquire a token
-		defer func() { <-sema }()
+		defer func() { <-sema }()//release token
 	case <-done:
 		return nil
 	}
-	// defer func() { <-sema }() //release token
 	entries, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return nil
