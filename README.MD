@@ -1,8 +1,30 @@
 # Go programming language
 
+
+## Basic Syntax
+```go
+s := "
+```
+**short variable declaration may be used only  within a function, not for package-level variables.**  
+**`new()` function can be used to create a unamed variable of type T and intializes the value to zero value of T and return the variable address**  
+**variable escape: go compiler may choose to allocate variables on heap or on the stack no matter how the variable is declared(by var or by new function)**
+```go
+    var global *int
+    func f(){
+        var x int
+        x = 1
+        global = &x //x will be allocated on heap, because it is still reachable by global after function f returned, so we can say x escapes from function f
+    }
+```
+
+## Data types
+
+a `rune` value in go is like a `char` value in other language: 
+
+
 **Return a pointer from function**
 
-If we return a local var pointer the go compiler will allocate the variable on the heap 
+If we return a local var pointer the go compiler will allocate the variable on the heap
 
 ```go
 package main
