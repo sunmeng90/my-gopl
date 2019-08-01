@@ -62,6 +62,37 @@ func (r *stringReader) Read(p []byte) (n int, err error) {
 }
 ```
 
+### 3.6.1 Constant generator `iota` (enumeration)
+
+`iota` will start with a 0 or with a expression and repeat for each enum entry
+
+```go
+// A Weekday specifies a day of the week (Sunday = 0, ...).
+type Weekday int
+
+const (
+	Sunday Weekday = iota //start with 0 and increment by 1 for each entry
+	Monday
+	Tuesday
+	Wednesday
+	Thursday
+	Friday
+	Saturday
+)
+
+
+type Flags uint
+// start with 1 << 0 and shift left by one bit for each entry
+const (
+	FlagUp           Flags = 1 << iota // interface is up
+	FlagBroadcast                      // interface supports broadcast access capability
+	FlagLoopback                       // interface is a loopback interface
+	FlagPointToPoint                   // interface belongs to a point-to-point link
+	FlagMulticast                      // interface supports multicast access capability
+)
+```
+
+
 # Struct and interface
 
 * struct are mainly for data structure definition
