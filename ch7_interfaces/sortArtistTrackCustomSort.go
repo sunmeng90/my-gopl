@@ -5,7 +5,7 @@ import (
 	"sort"
 )
 //Can't run like this: go run sortArtistTrackCustomSort.go
-//we need to comment out main in another file and run: go run ch7/*.go
+//we need to comment out main in another file and run: go run ch7_interfaces/*.go
 //otherwise go will not compile other files in the same package
 func main() {
 	fmt.Println("---------before------------")
