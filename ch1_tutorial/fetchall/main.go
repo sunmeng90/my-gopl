@@ -14,9 +14,10 @@ func main() {
 	start := time.Now()
 	ch := make(chan string)
 	for _, url := range os.Args[1:] {
-		go func(url string) {
-			fetch(url, ch)
-		}(url)
+		//go func(url string) {
+		//	fetch(url, ch)
+		//}(url)
+		go fetch(url, ch) // assign the value to first parameter
 	}
 	for range os.Args[1:] {
 		fmt.Fprintln(os.Stdout, <-ch)
